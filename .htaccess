@@ -1,0 +1,31 @@
+# 1. Запрещаем просмотр списка файлов в папке (Directory Browsing)
+# Если в папке не будет index.php, пользователь увидит 403 ошибку, а не список файлов
+Options -Indexes
+
+# 2. Запрещаем доступ к файлам логов через браузер
+# Это правило скроет и основной лог, и его бекап
+<FilesMatch "^error_log\.txt(\.bak)?$">
+    <IfModule mod_authz_core.c>
+        # Для Apache 2.4+
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        # Для старых версий Apache (2.2)
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# 3. Запрещаем доступ к самому файлу .htaccess
+<Files ".htaccess">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</Files>
+
+# 4. Устанавливаем кодировку по умолчанию
+AddDefaultCharset UTF-8
