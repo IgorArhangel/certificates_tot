@@ -147,6 +147,7 @@ if ($guid && $is_valid_guid && $action === 'download') {
     <?php endif; ?>
 </div>
 
+<?php if ($guid && $is_valid_guid): ?>
 <div class="loader-overlay" id="loaderOverlay">
     <div class="loader-box">
         <div style="display:flex; gap:6px; align-items:center; margin-bottom:8px;"> 
@@ -188,6 +189,7 @@ if ($guid && $is_valid_guid && $action === 'download') {
         }, 200);
     }
 </script>
+<?php endif; ?>
 
 <?php if (isset($trigger_download) && $trigger_download): ?>
 <script>
