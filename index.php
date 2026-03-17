@@ -106,6 +106,14 @@ if ($guid && $is_valid_guid && $action === 'download') {
         .success-msg { background: #f0fff4; border-left: 5px solid #48bb78; color: #22543d; padding: 15px; border-radius: 8px; margin-bottom: 25px; text-align: left; font-size: 14px; font-weight: 600; }
         
         .footer-text { color: #a0aec0; font-size: 13px; margin-top: 20px; }
+        .loader-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .loader-box { background: #fff; border-radius: 14px; padding: 18px 24px; display: flex; flex-direction: column; align-items: center; gap: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); min-width: 280px; }
+        .dot { width: 10px; height: 10px; background: #3182ce; border-radius: 100%; animation: dotPulse 1s infinite ease-in-out; }
+        .dot:nth-child(2) { animation-delay: 0.1s; }
+        .dot:nth-child(3) { animation-delay: 0.2s; }
+        @keyframes dotPulse { 0%, 100% { transform: scale(0.8); opacity: 0.4; } 50% { transform: scale(1.25); opacity: 1; } }
+        .progress { width: 100%; height: 10px; background: #e2e8f0; border-radius: 999px; overflow: hidden; margin-top: 8px; }
+        .progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #3182ce, #63b3ed); border-radius: 999px; transition: width 0.2s ease; }
     </style>
 </head>
 <body>
@@ -131,13 +139,55 @@ if ($guid && $is_valid_guid && $action === 'download') {
     <?php endif; ?>
 
     <?php if ($guid && $is_valid_guid): ?>
-        <a href="?GUID=<?php echo htmlspecialchars($guid); ?>&action=download" class="btn">
+        <a href="?GUID=<?php echo htmlspecialchars($guid); ?>&action=download" class="btn" id="downloadBtn" onclick="showLoader()">
             <?php echo $success_message ? 'Завантажити ще раз' : 'Завантажити архів (ZIP)'; ?>
         </a>
     <?php else: ?>
         <p class="footer-text">Будь ласка, скористайтеся QR кодом, вказаним на видатковій накладній</p>
     <?php endif; ?>
 </div>
+
+<div class="loader-overlay" id="loaderOverlay">
+    <div class="loader-box">
+        <div style="display:flex; gap:6px; align-items:center; margin-bottom:8px;"> 
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div style="font-weight:600; color:#1a202c;">Формується ZIP...</div>
+        </div>
+        <div id="loaderText" style="font-size:14px; color:#2d3748; font-weight:600;">Підготовка 0%</div>
+        <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+    </div>
+</div>
+
+<script>
+    function showLoader() {
+        const loader = document.getElementById('loaderOverlay');
+        if (!loader) return;
+        loader.style.display = 'flex';
+        const btn = document.getElementById('downloadBtn');
+        if (btn) {
+            btn.style.pointerEvents = 'none';
+            btn.style.opacity = '0.6';
+            btn.textContent = 'Готується...';
+        }
+
+        const progressBar = document.getElementById('progressBar');
+        const loaderText = document.getElementById('loaderText');
+        if (!progressBar || !loaderText) return;
+
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress = Math.min(progress + Math.floor(Math.random() * 10) + 8, 99);
+            progressBar.style.width = progress + '%';
+            loaderText.textContent = 'Підготовка ' + progress + '%';
+            if (progress >= 99) {
+                clearInterval(interval);
+                loaderText.textContent = 'Підготовка 99%... очікуйте відповіді сервера';
+            }
+        }, 200);
+    }
+</script>
 
 <?php if (isset($trigger_download) && $trigger_download): ?>
 <script>
